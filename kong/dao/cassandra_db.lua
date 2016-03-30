@@ -20,21 +20,21 @@ CassandraDB.dao_insert_values = {
   end
 }
 
-function CassandraDB:new(options)
+function CassandraDB:new(kong_config)
   local conn_opts = {
     shm = "cassandra",
     prepared_shm = "cassandra_prepared",
-    contact_points = options.contact_points,
-    keyspace = options.keyspace,
+    contact_points = kong_config.cassandra_contact_points,
+    keyspace = kong_config.cassandra_keyspace,
     query_options = {
       prepare = true
     },
-    username = options.username,
-    password = options.password,
+    username = kong_config.cassandra_username,
+    password = kong_config.cassandra_password,
     ssl_options = {
-      enabled = options.ssl.enabled,
-      verify = options.ssl.verify,
-      ca = options.ssl.certificate_authority
+      enabled = kong_config.cassandra_ssl,
+      verify = kong_config.cassandra_ssl_verify,
+      ca = kong_config.cassandra_ssl_trusted_cert
     }
   }
 
@@ -160,6 +160,7 @@ function CassandraDB:query(query, args, opts, schema, no_keyspace)
   if no_keyspace then
     conn_opts.keyspace = nil
   end
+
   local session, err = cassandra.spawn_session(conn_opts)
   if err then
     return nil, Errors.db(tostring(err))
